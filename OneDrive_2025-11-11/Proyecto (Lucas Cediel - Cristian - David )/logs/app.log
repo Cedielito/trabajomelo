@@ -1,0 +1,90 @@
+2025-11-08 22:18:46,716 - INFO - Iniciando aplicación principal (main.py)
+2025-11-08 22:18:46,827 - INFO - Inicializando interfaz gráfica...
+2025-11-08 22:18:46,828 - INFO - Archivo JSON no encontrado. Creando nuevo en c:\Users\CEDIELITO\Downloads\click05_sha256_solid_logging\core\data\users.json.
+2025-11-08 22:18:46,828 - INFO - Verificando superadmin inicial...
+2025-11-08 22:18:46,829 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:18:46,830 - INFO - Agregando usuario: superadmin (rol=superadmin)
+2025-11-08 22:18:46,831 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:18:46,831 - INFO - Guardando 1 usuarios en archivo JSON.
+2025-11-08 22:18:46,833 - INFO - Superadmin inicializado correctamente.
+2025-11-08 22:18:46,833 - INFO - Sembrando catálogo inicial...
+2025-11-08 22:18:46,834 - INFO - Catálogo cargado: 3 vehículos, 3 servicios.
+2025-11-08 22:18:46,834 - INFO - ReportManager inicializado.
+2025-11-08 22:18:46,834 - INFO - Construyendo pantalla de bienvenida.
+2025-11-08 22:24:07,229 - INFO - Iniciando aplicación principal (main.py)
+2025-11-08 22:24:07,351 - INFO - Inicializando interfaz gráfica...
+2025-11-08 22:24:07,352 - INFO - Verificando superadmin inicial...
+2025-11-08 22:24:07,352 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:24:07,353 - INFO - Sembrando catálogo inicial...
+2025-11-08 22:24:07,354 - INFO - Catálogo cargado: 3 vehículos, 3 servicios.
+2025-11-08 22:24:07,354 - INFO - ReportManager inicializado.
+2025-11-08 22:24:07,354 - INFO - Construyendo pantalla de bienvenida.
+2025-11-08 22:24:37,023 - INFO - Abriendo ventana de registro.
+2025-11-08 22:25:26,681 - INFO - Intentando registrar usuario: Pepito (rol=comprador)
+2025-11-08 22:25:26,682 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:25:26,683 - INFO - Agregando usuario: Pepito (rol=comprador)
+2025-11-08 22:25:26,683 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:25:26,683 - INFO - Guardando 2 usuarios en archivo JSON.
+2025-11-08 22:25:26,684 - INFO - Usuario registrado correctamente: Pepito
+2025-11-08 22:25:26,684 - INFO - Usuario registrado correctamente (UI): Pepito
+2025-11-08 22:25:33,244 - INFO - Abriendo ventana de registro.
+2025-11-08 22:25:35,329 - INFO - Intentando registrar usuario:  (rol=comprador)
+2025-11-08 22:25:35,329 - WARNING - Validación fallida de username: 
+2025-11-08 22:25:35,329 - WARNING - Registro fallido para : Usuario inválido (solo letras, números, guion bajo, 3-20 caracteres).
+2025-11-08 22:25:49,152 - INFO - Intentando registrar usuario: Pepito (rol=comprador)
+2025-11-08 22:25:49,152 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:25:49,162 - WARNING - Usuario ya registrado: Pepito
+2025-11-08 22:25:49,163 - WARNING - Registro fallido para Pepito: El usuario ya existe.
+2025-11-08 22:25:56,705 - INFO - Aplicación finalizada.
+2025-11-08 22:49:57,308 - INFO - Iniciando aplicación principal (main.py)
+2025-11-08 22:49:57,389 - INFO - Inicializando interfaz gráfica...
+2025-11-08 22:49:57,389 - INFO - Verificando superadmin inicial...
+2025-11-08 22:49:57,389 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:49:57,390 - INFO - Sembrando catálogo inicial...
+2025-11-08 22:49:57,390 - INFO - Catálogo cargado: 3 vehículos, 3 servicios.
+2025-11-08 22:49:57,390 - INFO - ReportManager inicializado.
+2025-11-08 22:49:57,390 - INFO - Construyendo pantalla de bienvenida.
+2025-11-08 22:50:00,646 - INFO - Abriendo ventana de login.
+2025-11-08 22:50:06,817 - INFO - Abriendo ventana de login.
+2025-11-08 22:50:24,438 - INFO - Iniciando sesión de usuario: Pepito
+2025-11-08 22:50:24,438 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 22:50:24,439 - INFO - Usuario autenticado correctamente: Pepito
+2025-11-08 22:50:24,439 - INFO - Usuario Pepito ha iniciado sesión en la UI.
+2025-11-08 22:50:25,285 - INFO - Abriendo dashboard para Pepito (rol=comprador)
+2025-11-08 22:50:26,299 - INFO - Mostrando facturas de usuario: Pepito
+2025-11-08 22:50:26,299 - INFO - Facturas consultadas para Pepito: 0
+2025-11-08 22:50:28,554 - INFO - Abriendo carrito de compras.
+2025-11-08 22:50:29,953 - INFO - Abriendo catálogo de vehículos.
+2025-11-08 22:50:31,291 - INFO - Vehículo añadido al carrito: Toyota Corolla 2024
+2025-11-08 22:50:32,670 - INFO - Abriendo lista de repuestos/seguros.
+2025-11-08 22:50:34,092 - INFO - Seguro añadido al carrito: Todo Riesgo
+2025-11-08 22:50:35,401 - INFO - Abriendo lista de repuestos/seguros.
+2025-11-08 22:50:39,037 - INFO - Repuesto añadido al carrito: Bujía x2
+2025-11-08 22:50:43,092 - INFO - Mostrando facturas de usuario: Pepito
+2025-11-08 22:50:43,093 - INFO - Facturas consultadas para Pepito: 0
+2025-11-08 22:50:45,720 - INFO - Abriendo carrito de compras.
+2025-11-08 22:50:48,422 - INFO - Factura registrada: d8f9594b-7ab7-4859-9d11-e500247f62dc (cliente=Pepito, total=55013.70)
+2025-11-08 22:50:48,422 - INFO - Factura generada para Pepito por $55013.70 (ID=d8f9594b-7ab7-4859-9d11-e500247f62dc)
+2025-11-08 22:50:53,060 - INFO - Mostrando facturas de usuario: Pepito
+2025-11-08 22:50:53,060 - INFO - Facturas consultadas para Pepito: 1
+2025-11-08 22:51:07,189 - INFO - Aplicación finalizada.
+2025-11-08 23:04:15,407 - INFO - Iniciando aplicación principal (main.py)
+2025-11-08 23:04:15,507 - INFO - Inicializando interfaz gráfica...
+2025-11-08 23:04:15,508 - INFO - Verificando superadmin inicial...
+2025-11-08 23:04:15,508 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 23:04:15,509 - INFO - Sembrando catálogo inicial...
+2025-11-08 23:04:15,510 - INFO - Catálogo cargado: 3 vehículos, 3 servicios.
+2025-11-08 23:04:15,510 - INFO - ReportManager inicializado.
+2025-11-08 23:04:15,511 - INFO - Construyendo pantalla de bienvenida.
+2025-11-08 23:04:16,365 - INFO - Abriendo ventana de registro.
+2025-11-08 23:04:24,961 - INFO - Intentando registrar usuario: liseth (rol=comprador)
+2025-11-08 23:04:24,962 - WARNING - Contraseña débil detectada.
+2025-11-08 23:04:24,962 - WARNING - Registro fallido para liseth: Contraseña inválida (mínimo 6 caracteres, 1 mayúscula y 1 símbolo).
+2025-11-08 23:04:33,507 - INFO - Intentando registrar usuario: liseth (rol=comprador)
+2025-11-08 23:04:33,507 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 23:04:33,508 - INFO - Agregando usuario: liseth (rol=comprador)
+2025-11-08 23:04:33,508 - INFO - Cargando usuarios desde archivo JSON.
+2025-11-08 23:04:33,508 - INFO - Guardando 3 usuarios en archivo JSON.
+2025-11-08 23:04:33,509 - INFO - Usuario registrado correctamente: liseth
+2025-11-08 23:04:33,509 - INFO - Usuario registrado correctamente (UI): liseth
+2025-11-08 23:04:57,774 - INFO - Aplicación finalizada.
