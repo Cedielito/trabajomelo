@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual env
+venv/
+.env/
+
+# Logs
+logs/
+*.log
+
+
+# IDEs
+.vscode/
+.idea/
+
+# OneDrive backups
+OneDrive_*/
+
