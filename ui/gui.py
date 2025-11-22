@@ -2,6 +2,8 @@
 import tkinter as tk
 from tkinter import messagebox, simpledialog
 from core.adapters.json_auth_repo import JsonAuthRepository
+from core.services.catalog_service import CatalogService
+from core.services.purchase_service import PurchaseService
 from core.services.authentication_service import AuthenticationService
 from core.services.registration_service import RegistrationService
 from core.services.user_admin_service import UserAdminService
@@ -15,23 +17,28 @@ import datetime, uuid
 
 class AppGUI:
     def __init__(self, root):
-        logger.info("Inicializando interfaz gráfica...")
         self.root = root
-        self.root.title("Mi Sistema - Intermediario (SHA256 + SOLID + Logging)")
+        self.root.title("Mi Sistema - Intermediario")
         self.root.geometry("980x640")
 
-        repo = JsonAuthRepository()
-        self.auth = AuthenticationService(repo)
-        self.registration = RegistrationService(repo)
-        self.users = UserAdminService(repo)
+        # Managers / Services
+        self.auth = AuthManager()
+        # ensure only superadmin is created here (no burned users)
+        self.auth.ensure_superadmin("superadmin", "Admin@123")
 
-        self.registration.ensure_superadmin("superadmin", "Admin@123")
+        # catálogo en memoria + servicio de catálogo
+        base_catalog = {"vehicles": [], "services": []}
+        seed_catalog(base_catalog)
+        self.catalog_service = CatalogService(base_catalog)
 
-        self.catalog = {"vehicles": [], "services": []}
-        seed_catalog(self.catalog)
-
+        # reportes + servicio de compras
         self.reports = ReportManager()
+        self.purchase_service = PurchaseService(self.reports)
+
+        # carrito actual
         self.current_cart = []
+
+        # pantalla inicial
         self.build_welcome()
 
     def build_welcome(self):
@@ -122,68 +129,98 @@ class AppGUI:
         tk.Button(self.root, text="Volver al inicio", command=self.build_welcome).pack(pady=10)
 
     # Catalogs / Services
+    # -------------------- Vehicle Catalog --------------------
     def screen_browse_vehicles(self):
-        logger.info("Abriendo catálogo de vehículos.")
-        win = tk.Toplevel(self.root); win.title("Catálogo de vehículos"); win.geometry("760x480")
-        top = tk.Frame(win); top.pack(fill="x", pady=6)
+        win = tk.Toplevel(self.root)
+        win.title("Catálogo de vehículos")
+        win.geometry("760x480")
+
+        top = tk.Frame(win)
+        top.pack(fill="x", pady=6)
         tk.Label(top, text="Filtrar por marca (vacío = todos):").pack(side="left", padx=8)
-        e = tk.Entry(top); e.pack(side="left", padx=8)
-        listbox = tk.Listbox(win, width=110, height=20); listbox.pack(pady=6, padx=8)
+        e = tk.Entry(top)
+        e.pack(side="left", padx=8)
+
+        listbox = tk.Listbox(win, width=110, height=20)
+        listbox.pack(pady=6, padx=8)
+
         def load(filter_text=""):
             listbox.delete(0, tk.END)
-            for v in self.catalog["vehicles"]:
+            vehicles = self.catalog_service.list_vehicles()
+            for v in vehicles:
                 if not filter_text or filter_text.lower() in v.marca.lower():
                     listbox.insert(tk.END, f"{v.id} | {v.marca} {v.modelo} - ${v.precio} - {v.descripcion}")
-            logger.debug("Filtro aplicado en vehículos: '%s'", filter_text)
+
         def add_to_cart():
             sel = listbox.curselection()
-            if not sel: 
-                logger.warning("Intento de añadir vehículo sin selección.")
-                messagebox.showwarning("Aviso", "Selecciona un vehículo"); return
-            idx = sel[0]; filt = e.get().strip()
-            visible = [v for v in self.catalog["vehicles"] if not filt or filt.lower() in v.marca.lower()]
+            if not sel:
+                messagebox.showwarning("Aviso", "Selecciona un vehículo")
+                return
+            idx = sel[0]
+            filt = e.get().strip()
+            all_vehicles = self.catalog_service.list_vehicles()
+            visible = [v for v in all_vehicles if not filt or filt.lower() in v.marca.lower()]
             chosen = visible[idx].clone()
             self.current_cart.append(LineItem(chosen, 1))
-            logger.info("Vehículo añadido al carrito: %s %s", chosen.marca, chosen.modelo)
             messagebox.showinfo("Carrito", f"Añadido: {chosen.marca} {chosen.modelo}")
-        btns = tk.Frame(win); btns.pack(pady=6)
+
+        btns = tk.Frame(win)
+        btns.pack(pady=6)
         tk.Button(btns, text="Filtrar", command=lambda: load(e.get().strip())).pack(side="left", padx=6)
         tk.Button(btns, text="Añadir al carrito", command=add_to_cart).pack(side="left", padx=6)
-        load()
 
+        load()
+    
+     # -------------------- Services (Repuestos / Seguros) --------------------
     def screen_browse_services(self):
-        logger.info("Abriendo lista de repuestos/seguros.")
-        win = tk.Toplevel(self.root); win.title("Repuestos y Seguros"); win.geometry("760x480")
-        lb = tk.Listbox(win, width=110, height=20); lb.pack(padx=8, pady=6)
+        win = tk.Toplevel(self.root)
+        win.title("Repuestos y Seguros")
+        win.geometry("760x480")
+
+        lb = tk.Listbox(win, width=110, height=20)
+        lb.pack(padx=8, pady=6)
+
         def load():
             lb.delete(0, tk.END)
-            for s in self.catalog["services"]:
+            for s in self.catalog_service.list_services():
                 if hasattr(s, "nombre"):
                     lb.insert(tk.END, f"Repuesto | {s.id} | {s.nombre} | ${s.precio} | Stock: {s.stock}")
                 elif hasattr(s, "tipo"):
                     lb.insert(tk.END, f"Seguro  | {s.id} | {s.tipo} | ${s.precio} | Vigencia: {s.vigencia_meses} meses")
                 else:
                     lb.insert(tk.END, f"Servicio | {s.id} | {getattr(s,'nombre',str(s))}")
-            logger.debug("Lista de servicios refrescada.")
+
         def add_selected():
             sel = lb.curselection()
             if not sel:
-                logger.warning("Intento de añadir servicio sin selección.")
-                messagebox.showwarning("Aviso", "Selecciona un servicio."); return
-            item = self.catalog["services"][sel[0]]
+                messagebox.showwarning("Aviso", "Selecciona un servicio.")
+                return
+            all_services = self.catalog_service.list_services()
+            item = all_services[sel[0]]
             if hasattr(item, "stock"):
-                qty = simpledialog.askinteger("Cantidad", f"Stock disponible: {item.stock}\nCantidad a comprar:", minvalue=1, maxvalue=item.stock)
-                if not qty: return
+                qty = simpledialog.askinteger(
+                    "Cantidad",
+                    f"Stock disponible: {item.stock}\nCantidad a comprar:",
+                    minvalue=1,
+                    maxvalue=item.stock,
+                )
+                if not qty:
+                    return
                 self.current_cart.append(LineItem(item, qty))
-                logger.info("Repuesto añadido al carrito: %s x%d", item.nombre, qty)
                 messagebox.showinfo("Carrito", f"Añadido repuesto {item.nombre} x{qty}")
             else:
                 self.current_cart.append(LineItem(item, 1))
-                logger.info("Seguro añadido al carrito: %s", getattr(item, "tipo", "N/A"))
-                messagebox.showinfo("Carrito", f"Añadido seguro {item.tipo}")
-        btns = tk.Frame(win); btns.pack(pady=6)
+                if hasattr(item, "tipo"):
+                    name = item.tipo
+                else:
+                    name = getattr(item, "nombre", "servicio")
+                messagebox.showinfo("Carrito", f"Añadido servicio/seguro {name}")
+
+        btns = tk.Frame(win)
+        btns.pack(pady=6)
         tk.Button(btns, text="Actualizar lista", command=load).pack(side="left", padx=6)
         tk.Button(btns, text="Añadir seleccionado al carrito", command=add_selected).pack(side="left", padx=6)
+
         load()
 
     # Cart / Checkout
@@ -385,7 +422,7 @@ class AppGUI:
         lb = tk.Listbox(win, width=120, height=18); lb.pack(padx=8, pady=8)
         def refresh():
             lb.delete(0, tk.END)
-            for v in self.catalog["vehicles"]:
+            for v in self.catalog_service.list_vehicles():
                 lb.insert(tk.END, f"{v.id} | {v.marca} {v.modelo} | ${v.precio} | Garantía: {v.garantia_meses} meses | Mantenimiento: {v.mantenimiento_tipo}")
             logger.debug("Lista de vehículos refrescada.")
         def create_vehicle():
@@ -400,8 +437,9 @@ class AppGUI:
                 if not (vid and marca and modelo and precio is not None and garantia is not None and mantenimiento):
                     logger.warning("Intento de crear vehículo con campos incompletos.")
                     messagebox.showerror("Error", "Faltan campos obligatorios."); return
-                v = VehicleFactory.create_vehicle(vid, marca, modelo, float(precio), int(garantia), mantenimiento, descripcion or "")
-                self.catalog["vehicles"].append(v); logger.info("Vehículo creado: %s %s", marca, modelo); messagebox.showinfo("OK", "Vehículo creado."); refresh()
+                v = VehicleFactory.create_vehicle(
+                vid, marca, modelo, float(precio), int(garantia), mantenimiento, descripcion or "")
+                self.catalog_service.add_vehicle(v); logger.info("Vehículo creado: %s %s", marca, modelo); messagebox.showinfo("OK", "Vehículo creado."); refresh()
             except Exception as e:
                 logger.exception("Error creando vehículo: %s", e)
                 messagebox.showerror("Error", "No se pudo crear el vehículo.")
@@ -410,7 +448,7 @@ class AppGUI:
             if not sel: 
                 logger.warning("Editar vehículo sin selección.")
                 messagebox.showwarning("Aviso", "Selecciona un vehículo."); return
-            v = self.catalog["vehicles"][sel[0]]
+            v = self.catalog_service.list_vehicles()[sel[0]]
             try:
                 marca = simpledialog.askstring("Marca", "Marca:", initialvalue=v.marca)
                 modelo = simpledialog.askstring("Modelo", "Modelo:", initialvalue=v.modelo)
@@ -434,9 +472,9 @@ class AppGUI:
             if not sel: 
                 logger.warning("Eliminar vehículo sin selección.")
                 messagebox.showwarning("Aviso", "Selecciona un vehículo."); return
-            v = self.catalog["vehicles"][sel[0]]
+            v = self.catalog_service.list_vehicles()[sel[0]]
             if messagebox.askyesno("Confirmar", f"Eliminar vehículo {v.marca} {v.modelo}?"):
-                self.catalog["vehicles"].remove(v)
+                self.catalog_service.remove_vehicle(v)
                 logger.info("Vehículo eliminado: %s %s", v.marca, v.modelo)
                 messagebox.showinfo("Eliminado", "Vehículo eliminado."); refresh()
         btns = tk.Frame(win); btns.pack(pady=6)
@@ -456,7 +494,7 @@ class AppGUI:
         lb = tk.Listbox(win, width=120, height=18); lb.pack(padx=8, pady=8)
         def refresh():
             lb.delete(0, tk.END)
-            for s in self.catalog["services"]:
+            for s in self.catalog_service.list_services():
                 if hasattr(s, "nombre"):
                     lb.insert(tk.END, f"Repuesto | {s.id} | {s.nombre} | ${s.precio} | Stock: {s.stock}")
                 elif hasattr(s, "tipo"):
@@ -473,7 +511,7 @@ class AppGUI:
                     logger.warning("Intento de crear repuesto con campos incompletos.")
                     messagebox.showerror("Error", "Faltan campos obligatorios."); return
                 r = ServiceFactory.create_service("repuesto", nombre=nombre, precio=float(precio), stock=int(stock))
-                self.catalog["services"].append(r); logger.info("Repuesto creado: %s", nombre); messagebox.showinfo("OK", "Repuesto creado."); refresh()
+                self.catalog_service.add_service(r); logger.info("Repuesto creado: %s", nombre); messagebox.showinfo("OK", "Repuesto creado."); refresh()
             except Exception as e:
                 logger.exception("Error creando repuesto: %s", e)
                 messagebox.showerror("Error", "No se pudo crear el repuesto.")
@@ -486,7 +524,7 @@ class AppGUI:
                     logger.warning("Intento de crear seguro con campos incompletos.")
                     messagebox.showerror("Error", "Faltan campos obligatorios."); return
                 s = ServiceFactory.create_service("seguro", tipo=tipo, precio=float(precio), vigencia_meses=int(vigencia))
-                self.catalog["services"].append(s); logger.info("Seguro creado: %s", tipo); messagebox.showinfo("OK", "Seguro creado."); refresh()
+                  self.catalog_service.add_service(s); logger.info("Seguro creado: %s", tipo); messagebox.showinfo("OK", "Seguro creado."); refresh()
             except Exception as e:
                 logger.exception("Error creando seguro: %s", e)
                 messagebox.showerror("Error", "No se pudo crear el seguro.")
@@ -495,7 +533,7 @@ class AppGUI:
             if not sel:
                 logger.warning("Editar servicio sin selección.")
                 messagebox.showwarning("Aviso", "Selecciona un servicio."); return
-            s = self.catalog["services"][sel[0]]
+            s = self.catalog_service.list_services()[sel[0]]
             try:
                 if hasattr(s, "nombre"):
                     nombre = simpledialog.askstring("Nombre", "Nombre:", initialvalue=s.nombre)
@@ -524,9 +562,9 @@ class AppGUI:
             if not sel:
                 logger.warning("Eliminar servicio sin selección.")
                 messagebox.showwarning("Aviso", "Selecciona un servicio."); return
-            s = self.catalog["services"][sel[0]]
+            s = self.catalog_service.list_services()[sel[0]]
             if messagebox.askyesno("Confirmar", "Eliminar servicio seleccionado?"):
-                self.catalog["services"].remove(s)
+                self.catalog_service.remove_service(s)
                 logger.info("Servicio eliminado: %s", getattr(s, "nombre", getattr(s, "tipo", "N/A")))
                 messagebox.showinfo("Eliminado", "Servicio eliminado."); refresh()
         btns = tk.Frame(win); btns.pack(pady=6)
