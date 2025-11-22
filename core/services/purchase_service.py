@@ -1,61 +1,50 @@
 # core/services/purchase_service.py
-from typing import List, Any
-import uuid
 import datetime
+import uuid
+from typing import List
 
-from core.models import Factura
+from core.models import LineItem, Factura
 from core.report_manager import ReportManager
+from core.services.catalog_service import CatalogService
 
 
 class PurchaseService:
     """
-    Servicio responsable de:
-    - crear facturas a partir del carrito
-    - calcular totales (usando Factura.calculate_totals)
-    - registrar la factura en ReportManager
-    - actualizar stock de repuestos
-
-    La UI NO debería crear Factura directamente ni manipular stock.
+    Servicio que encapsula la creación de facturas:
+    - Crea Factura
+    - Calcula totales
+    - Registra en ReportManager
+    - Ajusta stock de repuestos
     """
 
-    def __init__(self, report_manager: ReportManager):
+    def __init__(self, report_manager: ReportManager, catalog_service: CatalogService):
         self._reports = report_manager
+        self._catalog = catalog_service
 
-    def create_invoice_from_cart(
+    def create_invoice(
         self,
-        cart_items: List[Any],
+        cart_items: List[LineItem],
         cliente_username: str,
         matricula: str = "",
     ) -> Factura:
-        """
-        Crea la factura, calcula totales y la registra en ReportManager.
-        """
         fid = str(uuid.uuid4())
         factura = Factura(
             id=fid,
             cliente_username=cliente_username,
-            items=list(cart_items),  # copiamos lista
+            items=list(cart_items),
             fecha=datetime.datetime.now(),
-            matricula=matricula,
+            matricula=matricula.upper() if matricula else "",
         )
         factura.calculate_totals()
-        self._reports.log_invoice(factura)
-        return factura
 
-    def decrease_stock_for_invoice(self, factura: Factura, services_catalog: List[Any]) -> None:
-        """
-        Reduce el stock de los repuestos en base a los items de la factura.
-        """
+        # Registrar en reportes
+        self._reports.log_invoice(factura)
+
+        # Ajustar stock de repuestos
         for li in factura.items:
-            if hasattr(li.item, "stock"):
-                # buscamos el repuesto original por id en la lista de servicios
-                orig = next(
-                    (
-                        r
-                        for r in services_catalog
-                        if getattr(r, "id", None) == getattr(li.item, "id", None)
-                    ),
-                    None,
-                )
-                if orig is not None:
-                    orig.stock = max(0, orig.stock - li.quantity)
+            item = li.item
+            sid = getattr(item, "id", None)
+            if sid is not None and hasattr(item, "stock"):
+                self._catalog.decrement_repuesto_stock(sid, li.quantity)
+
+        return factura
