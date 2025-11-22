@@ -4,7 +4,15 @@
 ###  Pegar contenido
 
 ```markdown
+
+
 # CHANGELOG
+
+# CHANGELOG
+
+Este archivo documenta todos los cambios realizados en el proyecto según los requerimientos y entregables solicitados.
+
+
 
 ## v1.0.0 - 2025-11-14
 - Se crea la estructura inicial del proyecto.
@@ -17,6 +25,16 @@
 - Validaciones robustas para usuario, contraseña y matrícula.
 
 ## v1.2.0 - 2025-11-16
-- GUI segmentada en pestañas (Tkinter Notebook).
+-(Tkinter Notebook).
 - Servicios de catálogo, carrito y facturación completamente desacoplados.
 - JsonAuthRepository con manejo atómico de archivo JSON.
+
+## [1.3.0] - 2025-11-21
+### Refactorización de autenticación (RF-01)
+- Implementada interfaz `IAuthRepository` con tipado y métodos estándar.
+- Implementado `JsonAuthRepository` como adaptador a repositorio JSON.
+- Creado `LoginResult` como objeto de resultado para login.
+- `AuthenticationService` ahora utiliza inyección de dependencias (DIP).
+- Registro y administración de usuarios delegados a `RegistrationService` y `UserAdminService`.
+
+
