@@ -37,4 +37,12 @@ Este archivo documenta todos los cambios realizados en el proyecto según los re
 - `AuthenticationService` ahora utiliza inyección de dependencias (DIP).
 - Registro y administración de usuarios delegados a `RegistrationService` y `UserAdminService`.
 
+## [1.0.3] - 2025-02-13
+### Implementación de servicios principales (RF-02 y RF-03)
+- Creado `CatalogService` para gestionar vehículos, repuestos y seguros.
+- Eliminada la manipulación directa del catálogo desde la GUI.
+- Creado `PurchaseService` para generar facturas de forma centralizada.
+- GUI ahora usa exclusivamente `catalog_service` y `purchase_service`.
+- Eliminado código duplicado en creación de facturas.
+
 
