@@ -37,12 +37,22 @@ Este archivo documenta todos los cambios realizados en el proyecto según los re
 - `AuthenticationService` ahora utiliza inyección de dependencias (DIP).
 - Registro y administración de usuarios delegados a `RegistrationService` y `UserAdminService`.
 
-## [1.0.3] - 2025-02-13
+## [1.4.0] - 2025-11-21
 ### Implementación de servicios principales (RF-02 y RF-03)
 - Creado `CatalogService` para gestionar vehículos, repuestos y seguros.
 - Eliminada la manipulación directa del catálogo desde la GUI.
 - Creado `PurchaseService` para generar facturas de forma centralizada.
 - GUI ahora usa exclusivamente `catalog_service` y `purchase_service`.
 - Eliminado código duplicado en creación de facturas.
+
+## [1.5.0] - 2025-11-22
+### Tests unitarios añadidos (RF-05)
+- Se creó carpeta `tests/` con las pruebas:
+  - `test_auth.py` (login correcto, usuario inexistente, contraseña incorrecta)
+  - `test_registration.py` (validación de username y password)
+  - `test_validators.py` (validación de matrícula)
+  - `test_purchase.py` (creación de factura y cálculo de totales)
+- Configurado pytest para ejecución completa.
+- Cobertura superior al 90% en los tests escritos.## [1.0.4] - 2025-02-14
 
 
