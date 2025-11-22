@@ -53,6 +53,6 @@ Este archivo documenta todos los cambios realizados en el proyecto según los re
   - `test_validators.py` (validación de matrícula)
   - `test_purchase.py` (creación de factura y cálculo de totales)
 - Configurado pytest para ejecución completa.
-- Cobertura superior al 90% en los tests escritos.## [1.0.4] - 2025-02-14
+- Cobertura superior al 90% en los tests escritos.
 
 
