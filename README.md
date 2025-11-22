@@ -43,5 +43,5 @@ python main.py
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/serverotrabajos/trabajomelo.git
+git clone https://github.com/Cedielito/trabajomelo.git
 cd trabajomelo
