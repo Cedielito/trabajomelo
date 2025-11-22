@@ -1,39 +1,51 @@
-
+# core/services/authentication_service.py
+from dataclasses import dataclass
 from typing import Optional
-from ..ports.auth_repo import IAuthRepository, UserRecord
-from ..crypto import hash_password_sha256
-from ..log_config import logger
+
+from core.crypto import verify_password
+from core.ports.auth_repo import IAuthRepository, UserRecord
+from core.validators import validate_username, validate_password
+
+
+@dataclass
+class LoginResult:
+    """
+    Resultado tipado del login:
+    - ok: True / False
+    - user: usuario autenticado (o None)
+    - code: código de estado para la UI
+    """
+    ok: bool
+    user: Optional[UserRecord]
+    code: str
+
 
 class AuthenticationService:
-    """Responsable solo de login/logout y sesión actual."""
     def __init__(self, repo: IAuthRepository):
-        self.repo = repo
-        self._current: Optional[UserRecord] = None
+        self._repo = repo
+        self._current_user: Optional[UserRecord] = None
 
     @property
     def current_user(self) -> Optional[UserRecord]:
-        return self._current
+        return self._current_user
 
-    def authenticate(self, username: str, password: str) -> Optional[UserRecord]:
-        logger.info("Iniciando sesión de usuario: %s", username)
-        try:
-            rec = self.repo.get(username)
-            if not rec:
-                logger.warning("Usuario inexistente: %s", username)
-                return None
-            if rec.pw_hash == hash_password_sha256(password):
-                self._current = rec
-                logger.info("Usuario autenticado correctamente: %s", username)
-                return rec
-            logger.warning("Contraseña incorrecta para usuario: %s", username)
-            return None
-        except Exception as e:
-            logger.exception("Error inesperado durante autenticación para %s: %s", username, e)
-            return None
+    def login(self, username: str, password: str) -> LoginResult:
+        if not username or not password:
+            return LoginResult(False, None, "EMPTY")
+
+        if not validate_username(username):
+            return LoginResult(False, None, "INVALID_USERNAME")
+
+        # (opcional) no validamos formato de contraseña aquí para no filtrar info
+        user = self._repo.get(username)
+        if not user:
+            return LoginResult(False, None, "NOT_FOUND")
+
+        if not verify_password(password, user.pw_hash):
+            return LoginResult(False, None, "BAD_PASSWORD")
+
+        self._current_user = user
+        return LoginResult(True, user, "OK")
 
     def logout(self) -> None:
-        if self._current:
-            logger.info("Sesión cerrada por usuario %s", self._current.username)
-        else:
-            logger.info("Logout llamado sin usuario autenticado.")
-        self._current = None
+        self._current_user = None
