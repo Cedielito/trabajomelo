@@ -1,8 +1,7 @@
-
 import hashlib
-from .log_config import logger
 
-def hash_password_sha256(password: str) -> str:
-    # DEBUG: hashing operation (no se loguea el contenido del password)
-    logger.debug("Calculando hash SHA-256 de contraseña (contenido no visible).")
-    return hashlib.sha256(password.encode('utf-8')).hexdigest()
+def hash_password(password: str) -> str:
+    return hashlib.sha256(password.encode("utf-8")).hexdigest()
+
+def verify_password(plain_password: str, stored_hash: str) -> bool:
+    return hash_password(plain_password) == stored_hash
